@@ -87,17 +87,23 @@ class PerformanceManager extends EventEmitter {
     )
   }
 
+  /**
+   * @param {number | BigNumber} amount
+   * @param {number | BigNumber} price
+   * @returns {BigNumber} returns the realized PnL
+   */
   addOrder (amount, price) {
     amount = new BigNumber(amount)
     price = new BigNumber(price)
 
     const total = amount.multipliedBy(price)
+    let realizedPnL = new BigNumber(0)
 
     if (amount.isPositive()) {
       this.availableFunds = this.availableFunds.minus(total)
       this.openOrders.push({ amount, price })
       this.selfUpdate()
-      return
+      return realizedPnL
     }
 
     if (this.positionSize().isLessThan(amount.abs())) {
@@ -109,16 +115,20 @@ class PerformanceManager extends EventEmitter {
     while (!amount.isZero() && this.openOrders.length > 0) {
       const order = this.openOrders.shift()
 
-      if (order.amount.isLessThanOrEqualTo(amount.abs())) {
-        amount = amount.plus(order.amount)
-      } else {
-        order.amount = order.amount.plus(amount)
+      const partialAmount = BigNumber.min(order.amount, amount.abs())
+      realizedPnL = realizedPnL.plus(price.minus(order.price).multipliedBy(partialAmount))
+
+      amount = amount.plus(partialAmount)
+      order.amount = order.amount.minus(partialAmount)
+
+      if (order.amount.isGreaterThan(0)) {
         this.openOrders.unshift(order)
-        break
       }
     }
 
     this.selfUpdate()
+
+    return realizedPnL
   }
 
   /**

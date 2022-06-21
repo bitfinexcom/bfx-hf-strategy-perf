@@ -96,13 +96,19 @@ describe('PerformanceManager', () => {
       const pos = new PerformanceManager(priceFeed, constraints)
       const price = 1000
 
-      pos.addOrder(0.3, price)
+      let realizedPnl = pos.addOrder(0.3, price)
+      expect(realizedPnl.toNumber()).to.eq(0)
 
-      pos.addOrder(0.7, price)
+      realizedPnl = pos.addOrder(0.7, price + 30)
+      expect(realizedPnl.toNumber()).to.eq(0)
 
-      pos.addOrder(-0.5, price)
+      realizedPnl = pos.addOrder(-0.5, price - 80)
+      expect(realizedPnl.toNumber()).to.eq(-46)
 
-      expect(pos.positionSize().toNumber()).to.eq(0.5)
+      realizedPnl = pos.addOrder(-0.2, price + 100)
+      expect(realizedPnl.toNumber()).to.eq(14)
+
+      expect(pos.positionSize().toNumber()).to.eq(0.3)
     })
   })
 
