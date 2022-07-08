@@ -101,7 +101,7 @@ class PerformanceManager extends EventEmitter {
     }
 
     if (this.positionSize().isLessThan(amount.abs())) {
-      throw new Error('can not over-sell position')
+      throw new Error('short positions are not supported in this version')
     }
 
     this.availableFunds = this.availableFunds.plus(total.abs())
