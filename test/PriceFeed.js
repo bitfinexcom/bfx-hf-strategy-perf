@@ -1,11 +1,9 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-env mocha */
 
-const { stub, assert } = require('sinon')
 const { expect } = require('chai')
 
 const PriceFeed = require('../src/PriceFeed')
-const BigNumber = require('bignumber.js')
 
 describe('PriceFeed', () => {
   const timeBucketSize = 500
